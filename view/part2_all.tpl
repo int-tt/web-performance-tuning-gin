@@ -57,8 +57,8 @@
           </div>
           {{if .Messages_line}}
             <ul>
-            {{range $message := .Messages_line}}
-              <li> {{ $message.message }} ({{ $message.created_at }})</li>
+            {{range .MessagesLine}}
+              <li> {{ .Text }} ({{ .CreateAt }})</li>
             {{end}}
             </ul>
           {{end}}

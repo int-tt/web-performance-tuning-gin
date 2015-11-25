@@ -11,6 +11,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type MessageLine struct {
+	Text     string
+	CreateAt string
+}
+
 func main() {
 	db, err := sql.Open("mysql", "demouser:demopass@tcp(127.0.0.1:3306)/groupwork?charset=utf8")
 	if err != nil {
@@ -37,7 +42,7 @@ func main() {
 		var follow string
 		var follower string
 		var name string
-		var messagesLine []string
+		var messagesLine []MessageLine
 		id := rand.Intn(99999) + 1
 		rows, _ := db.Query("select (select count(id) from messages where user_id = ?) messages,(select count(id) from  follows where user_id = ?) follow, (select count(id) from  follows where follow_user_id =?) follower,(SELECT name FROM  users WHERE id = ?) name", id, id, id, id)
 		for rows.Next() {
@@ -45,16 +50,16 @@ func main() {
 		}
 		rows, _ = db.Query("select message,created_at from messages where id = ? order by created_at desc limit 10", id)
 		for rows.Next() {
-			var row string
-			_ = rows.Scan(&row)
+			var row MessageLine
+			_ = rows.Scan(&row.Text, &row.CreateAt)
 			messagesLine = append(messagesLine, row)
 		}
 		c.HTML(http.StatusOK, "part2_all.tpl", gin.H{
-			"Message":       messages,
-			"Follow":        follow,
-			"Fllower":       follower,
-			"User":          name,
-			"Messages_line": messagesLine,
+			"Message":      messages,
+			"Follow":       follow,
+			"Follower":     follower,
+			"User":         name,
+			"MessagesLine": messagesLine,
 		})
 	})
 	//router.POST("/exercise/part3", Part3)

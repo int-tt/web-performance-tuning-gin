@@ -62,6 +62,32 @@ func main() {
 			"MessagesLine": messagesLine,
 		})
 	})
+
+	router.POST("/exercise/part3", func(c *gin.Context) {
+		id := rand.Intn(1000006) + 1
+		title := c.Query("title")
+		message := c.Query("message")
+		_, _ = db.Query("insert into messages values(null,?,?,?,now(),now())", id, title, message+"by "+strconv.Itoa(id))
+		c.Redirect(http.StatusMovedPermanently, "/exercise/part1")
+	})
+
+	router.GET("/exercise/part4", func(c *gin.Context) {
+		string := "チューニングバトル"
+		var messagesLine []MessageLine
+		rows, _ := db.Query("select title,message,created_at from messages where title = ? order by created_at desc limit 10", string)
+		for rows.Next() {
+			var row MessageLine
+			_ = rows.Scan(&row.Text, &row.CreateAt)
+			messagesLine = append(messagesLine, row)
+		}
+		c.HTML(http.StatusOK, "part2_all.tpl", gin.H{
+			"MessagesLine": messagesLine,
+		})
+	})
+
+	router.GET("/exercise/part5", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "part5.tpl", gin.H{})
+	})
 	//router.POST("/exercise/part3", Part3)
 	//router.GET("/exercise/part4", Part4)
 	//router.GET("/exercise/part5", Part5)

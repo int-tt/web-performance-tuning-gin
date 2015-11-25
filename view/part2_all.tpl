@@ -55,7 +55,7 @@
               </div>
             </form>
           </div>
-          {{if .Messages_line}}
+          {{if .MessagesLine}}
             <ul>
             {{range .MessagesLine}}
               <li> {{ .Text }} ({{ .CreateAt }})</li>

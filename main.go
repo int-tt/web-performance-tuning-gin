@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	//"github.com/sonots/go-sql_metrics"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -17,12 +18,18 @@ type MessageLine struct {
 }
 
 func main() {
-	db, err := sql.Open("mysql", "demouser:demopass@tcp(127.0.0.1:3306)/groupwork?charset=utf8")
-	if err != nil {
-		panic(err.Error())
+	db, errr := sql.Open("mysql", "demouser:demopass@unix(/var/lib/mysql/mysql.sock)/groupwork?charset=utf8")
+	if errr != nil {
+		panic(errr.Error())
 	}
+	db.SetMaxIdleConns(2048)
+	//db := sql_metrics.WrapDB("demouser:demopass@unix(/var/lib/mysql/mysql.sock)/groupwork?charset=utf8", _db)
+	//sql_metrics.Verbose = true
+	//sql_metrics.Print(1)
 	defer db.Close()
-	router := gin.Default()
+	router := gin.New()
+	router.Use(gin.Recovery())
+	//router := gin.Default()
 	router.Static("/static/", "./static/")
 	router.LoadHTMLGlob("view/*")
 
@@ -31,7 +38,6 @@ func main() {
 		for i := 0; i < 1000; i++ {
 			messageLine[i] = "Sunrise" + strconv.Itoa(time.Now().Year()) + "　チューニングバトル！誰が栄冠の1位になるのか？0.001秒を削る熱いバトル！！！誰が？誰が？誰が？誰が栄冠の1位に！！！！！！！！！！！"
 		}
-
 		c.HTML(http.StatusOK, "part1.tpl", gin.H{
 			"Message": messageLine,
 		})
@@ -44,15 +50,21 @@ func main() {
 		var name string
 		var messagesLine []MessageLine
 		id := rand.Intn(99999) + 1
-		rows, _ := db.Query("select (select count(id) from messages where user_id = ?) messages,(select count(id) from  follows where user_id = ?) follow, (select count(id) from  follows where follow_user_id =?) follower,(SELECT name FROM  users WHERE id = ?) name", id, id, id, id)
-		for rows.Next() {
-			_ = rows.Scan(&messages, &follow, &follower, &name)
+		if rows, err := db.Query("select (select count(id) from messages where user_id = ?) messages,(select count(id) from  follows where user_id = ?) follow, (select count(id) from  follows where follow_user_id =?) follower,(SELECT name FROM  users WHERE id = ?) name", id, id, id, id); err != nil {
+		} else {
+			for rows.Next() {
+				if err = rows.Scan(&messages, &follow, &follower, &name); err != nil {
+				}
+			}
 		}
-		rows, _ = db.Query("select message,created_at from messages where id = ? order by created_at desc limit 10", id)
-		for rows.Next() {
-			var row MessageLine
-			_ = rows.Scan(&row.Text, &row.CreateAt)
-			messagesLine = append(messagesLine, row)
+		if rows, err := db.Query("select message,created_at from messages where user_id = ? order by created_at desc limit 10", id); err != nil {
+		} else {
+			for rows.Next() {
+				var row MessageLine
+				if err = rows.Scan(&row.Text, &row.CreateAt); err != nil {
+				}
+				messagesLine = append(messagesLine, row)
+			}
 		}
 		c.HTML(http.StatusOK, "part2_all.tpl", gin.H{
 			"Message":      messages,
@@ -65,8 +77,9 @@ func main() {
 
 	router.POST("/exercise/part3", func(c *gin.Context) {
 		id := rand.Intn(1000006) + 1
-		title := c.Query("title")
-		message := c.Query("message")
+		title := c.PostForm("title")
+		message := c.PostForm("message")
+		//fmt.Println(title,message)
 		_, _ = db.Query("insert into messages values(null,?,?,?,now(),now())", id, title, message+"by "+strconv.Itoa(id))
 		c.Redirect(http.StatusMovedPermanently, "/exercise/part1")
 	})
@@ -74,11 +87,14 @@ func main() {
 	router.GET("/exercise/part4", func(c *gin.Context) {
 		string := "チューニングバトル"
 		var messagesLine []MessageLine
-		rows, _ := db.Query("select title,message,created_at from messages where title = ? order by created_at desc limit 10", string)
-		for rows.Next() {
-			var row MessageLine
-			_ = rows.Scan(&row.Text, &row.CreateAt)
-			messagesLine = append(messagesLine, row)
+		if rows, err := db.Query("select message,created_at from messages where title = ? order by created_at desc limit 10", string); err != nil {
+		} else {
+			for rows.Next() {
+				var row MessageLine
+				if err = rows.Scan(&row.Text, &row.CreateAt); err != nil {
+				}
+				messagesLine = append(messagesLine, row)
+			}
 		}
 		c.HTML(http.StatusOK, "part2_all.tpl", gin.H{
 			"MessagesLine": messagesLine,
@@ -88,50 +104,6 @@ func main() {
 	router.GET("/exercise/part5", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "part5.tpl", gin.H{})
 	})
-	//router.POST("/exercise/part3", Part3)
-	//router.GET("/exercise/part4", Part4)
-	//router.GET("/exercise/part5", Part5)
-
-	//router.LoadHTMLGlob("view/*")
-	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
-	//router.GET("/index", func(c *gin.Context) {
-	//	c.HTML(http.StatusOK, "index.tpl", gin.H{
-	//		"Website": "helloworld",
-	//		"Email":   "Email",
-	//	})
-	//})
-
-	router.Run(":8080")
-}
-
-//Part1
-func Part1(c *gin.Context) {
-	var messageLine [1000]string
-	for i := 0; i < 1000; i++ {
-		messageLine[i] = "Sunrise" + strconv.Itoa(time.Now().Year()) + "　チューニングバトル！誰が栄冠の1位になるのか？0.001秒を削る熱いバトル！！！誰が？誰が？誰が？誰が栄冠の1位に！！！！！！！！！！！"
-	}
-
-	c.HTML(http.StatusOK, "part1.tpl", gin.H{
-		"Message": messageLine,
-	})
-}
-
-//Part2
-func Part2(c *gin.Context) {
-
-}
-
-//Part3
-func Part3(c *gin.Context) {
-
-}
-
-//Part4
-func Part4(c *gin.Context) {
-
-}
-
-//Part5
-func Part5(c *gin.Context) {
-
+	router.RunUnix("main.sock")
+	//router.Run("127.0.0.1:8888")
 }

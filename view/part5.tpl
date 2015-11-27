@@ -11,8 +11,7 @@
     <title>Message AP</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="/bower_components/bootstrap/dist/css/bootstrap.css" rel="stylesheet">
-
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
   </head>
 
   <body>
@@ -31,8 +30,7 @@
       </footer>
 
     </div> <!-- /container -->
-
-    <script src="/bower_components/jquery/dist/jquery.js"></script>
-    <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+		<script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
   </body>
 </html>

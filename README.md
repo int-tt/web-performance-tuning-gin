@@ -25,7 +25,7 @@
 
 ### コメント
 
-**Transaction rateは6くらい**
+**Transaction rateは60くらい**
 
 ## 11/23
 

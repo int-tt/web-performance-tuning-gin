@@ -1,4 +1,6 @@
 #やったこと
+siege -c 350 -t 60s -f /home/demousers/web-performance-tuning/siege_exercise.txt
+
 ## 11/22
 
  + messages textにindexを貼った
@@ -24,6 +26,7 @@
  + thread_cache=512に変更
  + follows の follow_user_idにindexを貼り直した(?)(要検証)(user_idが早いのにfollow_user_idが遅いのが気になった)
  + yum update -y
+
 ### コメント
 
 まだまだMysqlがネックになってて言語を置き換えるよりも先にやることが多い感じ

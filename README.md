@@ -1,5 +1,10 @@
 #やったこと
-siege -c 350 -t 60s -f /home/demousers/web-performance-tuning/siege_exercise.txt
+
+計測は
+
+`siege -c 350 -t 60s -f /home/demousers/web-performance-tuning/siege_exercise.txt`
+
+で行いました
 
 ## 11/22
 

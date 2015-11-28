@@ -2,7 +2,7 @@
 
 計測は
 
-`siege -c 350 -t 60s -f /home/demousers/web-performance-tuning/siege_exercise.txt`
+`siege -c N -t 60s -f /home/demousers/web-performance-tuning/siege_exercise.txt`
 
 で行いました
 

@@ -1,4 +1,12 @@
 #やったこと
+##構成
+(初期)
+[varnish]--{http(ipv4)}--[apache(modphp)]--{jttp(ipv4)}--[mysql]
+
+(最終)
+[nginx]--{unix domain socket}--[Go]--{unix domain socket}--[mysql]
+
+
 
 計測は
 
